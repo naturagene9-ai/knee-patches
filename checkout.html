@@ -1075,19 +1075,7 @@
   })
   .then(res => {
 
-    // 🔥 WhatsApp Dynamic Message
-    let message = `Hello, I have placed an order:
-
-Name: ${name}
-Phone: ${phone}
-Product: ${product}
-Price: ₹${price}
-
-Please confirm my order.`;
-
-    let whatsappURL = `thankyou.html`;
-
-    // Redirect
+// Redirect
     window.location.href = "thankyou.html";
 
   });
