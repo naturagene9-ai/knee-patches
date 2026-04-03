@@ -841,7 +841,7 @@
       <div class="payment-option">
         <div class="cod-icon">💵</div>
         <div class="cod-info">
-          <div class="cod-title">Cash on Delivery</div>
+          <div class="cod-title">Online</div>
           <div class="cod-subtitle">Pay after delivery · 100% safe & trusted</div>
         </div>
         <span class="cod-selected">✓ Selected</span>
@@ -863,7 +863,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Price</span>
-          <span class="summary-value" id="sum-price">₹799</span>
+          <span class="summary-value" id="sum-price">₹350</span>
         </div>
         <div class="summary-row">
           <span class="summary-label">Delivery Charges</span>
@@ -871,7 +871,7 @@
         </div>
         <div class="summary-row">
           <span class="summary-label">Payment Mode</span>
-          <span class="summary-value">Cash on Delivery</span>
+          <span class="summary-value">Online</span>
         </div>
         <div class="summary-divider"></div>
         <div class="summary-total-row">
@@ -926,7 +926,7 @@
   <div class="cta-wrap">
     <button class="btn-confirm" id="btnConfirm" onclick="submitOrder()">
       <div class="spinner"></div>
-      <span class="btn-text">🛒 Confirm Order · COD</span>
+      <span class="btn-text">🛒 Confirm Order.</span>
     </button>
     <p class="btn-sub-text">🔒 Secure &nbsp;|&nbsp; 📦 Free Delivery &nbsp;|&nbsp; 💵 Pay on Delivery</p>
   </div>
@@ -988,98 +988,87 @@
     return ok;
   }
 
-  // ── SUBMIT ──
-  function submitOrder() {
-    if (!validate()) {
-      showToast('⚠️ Please fill all required fields correctly');
-      // scroll to first error
-      const firstErr = document.querySelector('.has-error');
-      if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      return;
-    }
+<script>
 
-    const btn = document.getElementById('btnConfirm');
-    btn.classList.add('loading');
-    showToast('✅ Processing your order...');
+// ── SUBMIT ──
+function submitOrder() {
 
-    // Collect data
-    const selectedPack = document.querySelector('.pack-option.selected');
-    const orderData = {
-      name:    document.getElementById('name').value.trim(),
-      phone:   document.getElementById('phone').value.trim(),
-      address: document.getElementById('address').value.trim(),
-      city:    document.getElementById('city').value.trim(),
-      pin:     document.getElementById('pin').value.trim(),
-      product: selectedPack.dataset.name,
-      price:   selectedPack.dataset.price,
-    };
+  if (!validate()) {
+    showToast('⚠️ Please fill all required fields correctly');
 
-    console.log('Order placed:', orderData);
+    const firstErr = document.querySelector('.has-error');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-    setTimeout(() => {
-      // Open WhatsApp
-      const waText = encodeURIComponent(
-        `I have placed my order!\n\nName: ${orderData.name}\nPhone: ${orderData.phone}\nProduct: ${orderData.product}\nPrice: ₹${orderData.price}\nAddress: ${orderData.address}, ${orderData.city} - ${orderData.pin}`
-      );
-      window.open(`https://wa.me/917383929008?text=${waText}`, '_blank');
-
-      // Redirect to thank you
-      window.location.href = 'thankyou.html';
-    }, 1600);
+    return;
   }
 
-  // ── TOAST ──
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
-  }
+  const btn = document.getElementById('btnConfirm');
+  btn.classList.add('loading');
 
-  // ── PHONE: digits only ──
-  document.getElementById('phone').addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
-  });
-  document.getElementById('pin').addEventListener('input', e => {
-    e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
-  });
+  showToast('✅ Processing your order...');
 
-  // ── LIVE COUNTDOWN ──
-  let stockLeft = 7;
-  setInterval(() => {
-    if (stockLeft > 3 && Math.random() < 0.04) {
-      stockLeft--;
-      document.querySelector('.urgency-banner strong').textContent = ` ${stockLeft} packs left `;
-    }
-  }, 8000);
-  document.getElementById("orderForm").addEventListener("submit", function(e) {
-  e.preventDefault();
+  const selectedPack = document.querySelector('.pack-option.selected');
 
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const address = document.getElementById("address").value;
-  const product = document.getElementById("product").value;
-  const price = document.getElementById("price").value;
-
-  const data = {
-    name, phone, address,
-    city: document.getElementById("city").value,
-    pincode: document.getElementById("pincode").value,
-    product,
-    price
+  const orderData = {
+    name: document.getElementById('name').value.trim(),
+    phone: document.getElementById('phone').value.trim(),
+    address: document.getElementById('address').value.trim(),
+    city: document.getElementById('city').value.trim(),
+    pin: document.getElementById('pin').value.trim(),
+    product: selectedPack.dataset.name,
+    price: selectedPack.dataset.price
   };
 
+  console.log('Order placed:', orderData);
+
+  // 🔥 SEND DATA TO GOOGLE SHEET
   fetch("https://script.google.com/macros/s/AKfycbzWpdVOZN5m92OPiW79Of2IPEsQA0yi0-IUgDl9HWLGN4vPwAoAEc8_AFhtCh6-q24/exec", {
     method: "POST",
-    body: JSON.stringify(data)
+    body: JSON.stringify(orderData)
   })
   .then(res => {
-
-// Redirect
-    window.location.href = "thankyou.html";
-
+    // ✅ SUCCESS → redirect to thank you
+    window.location.href = 'thankyou.html';
+  })
+  .catch(err => {
+    console.error(err);
+    alert("❌ Error submitting order. Try again.");
   });
+
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+
+  setTimeout(() => {
+    t.classList.remove('show');
+  }, 3000);
+}
+
+// ── PHONE INPUT ──
+document.getElementById('phone').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10);
 });
+
+// ── PIN INPUT ──
+document.getElementById('pin').addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+});
+
+// ── LIVE COUNTDOWN ──
+let stockLeft = 7;
+
+setInterval(() => {
+  if (stockLeft > 3 && Math.random() < 0.04) {
+    stockLeft--;
+    document.querySelector('.urgency-banner strong').textContent =
+      ` ${stockLeft} packs left `;
+  }
+}, 8000);
+
 </script>
 </body>
 </html>
